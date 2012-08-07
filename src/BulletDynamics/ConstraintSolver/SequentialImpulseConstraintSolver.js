@@ -47,6 +47,8 @@
   var tmpCCVec2 = Bump.Vector3.create();
   var tmpCCVec3 = Bump.Vector3.create();
   var tmpCCVec4 = Bump.Vector3.create();
+  var tmpCCrelaxationRef = { value: 0 };
+  var tmpCCrel_velRef = { value: 0 };
 
   // globals used by SequentialImpulseConstraintSolver
   var gNumSplitImpulseRecoveries = 0;
@@ -437,14 +439,16 @@
 
         var rel_pos1 = tmpCCVec1,             // btVector3
             rel_pos2 = tmpCCVec2,             // btVector3
-            vel      = tmpCCVec3;             // btVector3
-        for ( var j = 0; j < manifold.getNumContacts(); ++j ) {
-          var cp = manifold.getContactPoint( j ); // btManifoldPoint&
+            vel      = tmpCCVec3,             // btVector3
+            numContacts = manifold.cachedPoints, // getNumContacts(), int
+            relaxationRef = tmpCCrelaxationRef,     // btScalar
+            rel_velRef = tmpCCrel_velRef;        // btScalar
+        for ( var j = 0; j < numContacts; ++j ) {
+          // var cp = manifold.getContactPoint( j ); // btManifoldPoint&
+          var cp = manifold.pointCache[ j ]; // btManifoldPoint&
 
-          if ( cp.getDistance() <= manifold.getContactProcessingThreshold() ) {
-            var relaxationRef = { value: 0 },     // btScalar
-                rel_velRef = { value: 0 },        // btScalar
-                frictionIndex = this.tmpSolverContactConstraintPool.length, // int
+          if ( cp.distance1 <= manifold.contactProcessingThreshold ) {
+            var frictionIndex = this.tmpSolverContactConstraintPool.length, // int
                 // btSolverConstraint&
                 // solverConstraint = this.tmpSolverContactConstraintPool.expandNonInitializing(),
                 solverConstraint = CreateSolverConstraint(),
