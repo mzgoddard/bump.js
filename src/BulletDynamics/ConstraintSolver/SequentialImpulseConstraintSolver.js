@@ -125,7 +125,7 @@
         solverConstraint.relpos1CrossNormal.assign( ftorqueAxis1 );
         solverConstraint.angularComponentA.assign(
           body0 ?
-            body0.getInvInertiaTensorWorld().multiplyVector( ftorqueAxis1, solverConstraint.angularComponentA ).multiplyVector( body0.getAngularFactor(), solverConstraint.angularComponentA ) :
+            body0.invInertiaTensorWorld.multiplyVector( ftorqueAxis1, solverConstraint.angularComponentA ).multiplyVector( body0.angularFactor, solverConstraint.angularComponentA ) :
             vecZero
         );
 
@@ -133,7 +133,7 @@
         solverConstraint.relpos2CrossNormal.assign( ftorqueAxis1 );
         solverConstraint.angularComponentB.assign(
           body1 ?
-            body1.getInvInertiaTensorWorld().multiplyVector( ftorqueAxis1, solverConstraint.angularComponentB ).multiplyVector( body1.getAngularFactor(), solverConstraint.angularComponentB ) :
+            body1.invInertiaTensorWorld.multiplyVector( ftorqueAxis1, solverConstraint.angularComponentB ).multiplyVector( body1.angularFactor, solverConstraint.angularComponentB ) :
             vecZero
         );
 
@@ -143,24 +143,24 @@
 
         if ( body0 ) {
           vec = ( solverConstraint.angularComponentA ).cross( rel_pos1, tmpSFCVec1 );
-          denom0 = body0.getInvMass() + normalAxis.dot( vec );
+          denom0 = body0.inverseMass + normalAxis.dot( vec );
         }
 
         if ( body1 ) {
           vec = ( solverConstraint.angularComponentB.negate( tmpSFCVec1 ) ).cross( rel_pos2, tmpSFCVec1 );
-          denom1 = body1.getInvMass() + normalAxis.dot( vec );
+          denom1 = body1.inverseMass + normalAxis.dot( vec );
         }
 
         var denom = relaxation / ( denom0 + denom1 );
         solverConstraint.jacDiagABInv = denom;
 
         var vel1Dotn =
-          solverConstraint.contactNormal.dot( body0 ? body0.getLinearVelocity() : vecZero ) +
-          solverConstraint.relpos1CrossNormal.dot( body0 ? body0.getAngularVelocity() : vecZero );
+          solverConstraint.contactNormal.dot( body0 ? body0.linearVelocity : vecZero ) +
+          solverConstraint.relpos1CrossNormal.dot( body0 ? body0.angularVelocity : vecZero );
 
         var vel2Dotn =
-          -solverConstraint.contactNormal.dot( body1 ? body1.getLinearVelocity() : vecZero ) +
-          solverConstraint.relpos2CrossNormal.dot( body1 ? body1.getAngularVelocity() : vecZero );
+          -solverConstraint.contactNormal.dot( body1 ? body1.linearVelocity : vecZero ) +
+          solverConstraint.relpos2CrossNormal.dot( body1 ? body1.angularVelocity : vecZero );
 
         var rel_vel = vel1Dotn + vel2Dotn;
 
