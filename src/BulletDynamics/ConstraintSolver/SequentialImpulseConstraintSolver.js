@@ -103,8 +103,12 @@
         desiredVelocity = desiredVelocity || 0;
         cfmSlip = cfmSlip || 0;
 
-        var body0 = Bump.RigidBody.upcast( colObj0 );
-        var body1 = Bump.RigidBody.upcast( colObj1 );
+        // var body0 = Bump.RigidBody.upcast( colObj0 );
+        // var body1 = Bump.RigidBody.upcast( colObj1 );
+        // assume already casted as setupFrictionConstraint is only called
+        // (indirectly) by convertContact which upcasts for us.
+        var body0 = colObj0;
+        var body1 = colObj1;
 
         solverConstraint.contactNormal.assign( normalAxis );
 
@@ -209,10 +213,13 @@
         rel_pos2
       ) {
 
-        var rb0 = Bump.RigidBody.upcast( colObj0 ),
-            rb1 = Bump.RigidBody.upcast( colObj1 ),
-            pos1 = cp.getPositionWorldOnA(),
-            pos2 = cp.getPositionWorldOnB(),
+        // var rb0 = Bump.RigidBody.upcast( colObj0 ),
+        //     rb1 = Bump.RigidBody.upcast( colObj1 ),
+        // assume already upcasted as only called by convertContact
+        var rb0 = colObj0,
+            rb1 = colObj1,
+            pos1 = cp.positionWorldOnA,
+            pos2 = cp.positionWorldOnB,
             torqueAxis0, torqueAxis1;
 
         pos1.subtract( colObj0.getWorldTransform().origin, rel_pos1 );
@@ -452,8 +459,11 @@
                 // btSolverConstraint&
                 // solverConstraint = this.tmpSolverContactConstraintPool.expandNonInitializing(),
                 solverConstraint = CreateSolverConstraint(),
-                rb0 = Bump.RigidBody.upcast( colObj0 ), // btRigidBody*
-                rb1 = Bump.RigidBody.upcast( colObj1 ); // btRigidBody*
+                // rb0 = Bump.RigidBody.upcast( colObj0 ), // btRigidBody*
+                // rb1 = Bump.RigidBody.upcast( colObj1 ); // btRigidBody*
+                // reuse the already casted solverBody values
+                rb0 = solverBodyA, // btRigidBody*
+                rb1 = solverBodyB; // btRigidBody*
 
             this.tmpSolverContactConstraintPool.push( solverConstraint );
 
