@@ -433,14 +433,14 @@
         var colObj0 = null; // btCollisionObject*
         var colObj1 = null; // btCollisionObject*
 
-        colObj0 = manifold.getBody0();
-        colObj1 = manifold.getBody1();
+        colObj0 = manifold.body0;
+        colObj1 = manifold.body1;
 
         var solverBodyA = Bump.RigidBody.upcast( colObj0 );
         var solverBodyB = Bump.RigidBody.upcast( colObj1 );
 
         // avoid collision response between two static objects
-        if ( ( !solverBodyA || !solverBodyA.getInvMass() ) && ( !solverBodyB || !solverBodyB.getInvMass() ) ) {
+        if ( ( !solverBodyA || !solverBodyA.inverseMass ) && ( !solverBodyB || !solverBodyB.inverseMass ) ) {
           return;
         }
 
