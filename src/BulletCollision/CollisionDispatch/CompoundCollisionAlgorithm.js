@@ -242,19 +242,19 @@
         var colObj = this.isSwapped ? body1 : body0;
         var otherObj = this.isSwapped ? body0 : body1;
 
-        Bump.Assert( colObj.getCollisionShape().isCompound() );
-        var compoundShape = colObj.getCollisionShape();
+        // Bump.Assert( colObj.getCollisionShape().isCompound() );
+        var compoundShape = colObj.collisionShape;
 
         // btCompoundShape might have changed: Make sure the internal child
         // collision algorithm caches are still valid.
-        if ( compoundShape.getUpdateRevision() !== this.compoundShapeRevision ) {
+        if ( compoundShape.updateRevision !== this.compoundShapeRevision ) {
           // Clear and update all
           this.removeChildAlgorithms();
 
           this.preallocateChildAlgorithms( body0, body1 );
         }
 
-        var tree = compoundShape.getDynamicAabbTree();
+        var tree = compoundShape.dynamicAabbTree;
         // use a dynamic aabb tree to cull potential child-overlaps
         callback.set( colObj, otherObj, this.dispatcher, dispatchInfo, resultOut, m_childCollisionAlgorithms, this.sharedManifold );
 
@@ -262,12 +262,15 @@
         // Note that we should actually recursively traverse all children,
         // btCompoundShape can nested more then 1 level deep. So we should add
         // a `refreshManifolds` in the btCollisionAlgorithm
-        var i;
-        var manifoldArray = [];
-        for ( i = 0; i < m_childCollisionAlgorithms.length; ++i ) {
+        var i,
+            childCollisionAlgorithms_length = m_childCollisionAlgorithms.length;
+        var manifoldArray = [],
+            manifoldArray_length;
+        for ( i = 0; i < childCollisionAlgorithms_length; ++i ) {
           if ( m_childCollisionAlgorithms[i] ) {
             m_childCollisionAlgorithms[i].getAllContactManifolds( manifoldArray );
-            for ( var m = 0; m < manifoldArray.length; ++m ) {
+            manifoldArray_length = manifoldArray.length;
+            for ( var m = 0; m < manifoldArray_length; ++m ) {
               if ( manifoldArray[m].getNumContacts() ) {
                 resultOut.setPersistentManifold( manifoldArray[m] );
                 resultOut.refreshContactPoints();
@@ -282,11 +285,11 @@
         if ( tree ) {
           var localAabbMin = tmpPCVec1;
           var localAabbMax = tmpPCVec2;
-          var otherInCompoundSpace = colObj.getWorldTransform()
+          var otherInCompoundSpace = colObj.worldTransform
             .inverse( tmpPCT1 )
-            .multiplyTransform( otherObj.getWorldTransform(), tmpPCT1 );
+            .multiplyTransform( otherObj.worldTransform, tmpPCT1 );
 
-          otherObj.getCollisionShape().getAabb( otherInCompoundSpace, localAabbMin, localAabbMax );
+          otherObj.collisionShape.getAabb( otherInCompoundSpace, localAabbMin, localAabbMax );
 
           var bounds = tmpPCVol1.setFromMM( localAabbMin, localAabbMax );
           // process all children, that overlap with  the given AABB bounds
@@ -321,7 +324,7 @@
           if ( m_childCollisionAlgorithms[i] ) {
             childShape = compoundShape.getChildShape( i );
             // if not longer overlapping, remove the algorithm
-            orgTrans.assign( colObj.getWorldTransform() );
+            orgTrans.assign( colObj.worldTransform );
             // orgInterpolationTrans.assign( colObj.getInterpolationWorldTransform() );
             var childTrans = compoundShape.getChildTransform( i );
             newChildWorldTrans = orgTrans.multiplyTransform( childTrans, newChildWorldTrans );
@@ -343,7 +346,7 @@
 
             // perform an AABB check first
             childShape.getAabb( newChildWorldTrans, aabbMin0, aabbMax0 );
-            otherObj.getCollisionShape().getAabb( otherObj.getWorldTransform(), aabbMin1, aabbMax1 );
+            otherObj.collisionShape.getAabb( otherObj.worldTransform, aabbMin1, aabbMax1 );
 
             if ( !Bump.testAabbAgainstAabb2( aabbMin0, aabbMax0, aabbMin1, aabbMax1 ) ) {
               m_childCollisionAlgorithms[i].destruct();
