@@ -71,8 +71,8 @@
 
         var col0 = body0,
             col1 = body1,
-            box0 = col0.getCollisionShape(),
-            box1 = col1.getCollisionShape();
+            box0 = col0.collisionShape,
+            box1 = col1.collisionShape;
 
         // Report a contact. Internally this will be kept persistent, and
         // contact reduction is done.
@@ -80,8 +80,8 @@
 
         var input = tmpPCInput1;
         input.maximumDistanceSquared = Infinity;
-        input.transformA.assign( body0.getWorldTransform() );
-        input.transformB.assign( body1.getWorldTransform() );
+        input.transformA.assign( body0.worldTransform );
+        input.transformB.assign( body1.worldTransform );
 
         detector.init( box0, box1 );
         detector.getClosestPoints( input, resultOut, dispatchInfo.debugDraw );
