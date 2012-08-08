@@ -87,8 +87,8 @@
         this.body0 = body0;
         this.body1 = body1;
 
-        this.rootTransA.assign( this.body0.getWorldTransform() );
-        this.rootTransB.assign( this.body1.getWorldTransform() );
+        this.rootTransA.assign( body0.worldTransform );
+        this.rootTransB.assign( body1.worldTransform );
 
         this.partId0 = 0;
         this.partId1 = 0;
