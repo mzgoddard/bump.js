@@ -244,15 +244,15 @@
 
         return function( colObj ) {
           var minAabb = tmpVec1, maxAabb = tmpVec2;
-          colObj.getCollisionShape().getAabb( colObj.getWorldTransform(), minAabb, maxAabb );
+          colObj.collisionShape.getAabb( colObj.worldTransform, minAabb, maxAabb );
           // Need to increase the aabb for contact thresholds.
           var contactThreshold = tmpVec3.setValue( Bump.gContactBreakingThreshold, Bump.gContactBreakingThreshold, Bump.gContactBreakingThreshold );
           minAabb.subtractSelf( contactThreshold );
           maxAabb.addSelf( contactThreshold );
 
-          if ( this.getDispatchInfo().useContinuous && colObj.getInternalType() === Bump.CollisionObject.CollisionObjectTypes.CO_RIGID_BODY && !colObj.isStaticOrKinematicObject() ) {
+          if ( this.getDispatchInfo().useContinuous && colObj.internalType === Bump.CollisionObject.CollisionObjectTypes.CO_RIGID_BODY && !colObj.isStaticOrKinematicObject() ) {
             var minAabb2 = tmpVec4, maxAabb2 = tmpVec5;
-            colObj.getCollisionShape().getAabb( colObj.getInterpolationWorldTransform(), minAabb2, maxAabb2 );
+            colObj.collisionShape.getAabb( colObj.getInterpolationWorldTransform(), minAabb2, maxAabb2 );
             minAabb2.subtractSelf( contactThreshold );
             maxAabb2.addSelf( contactThreshold );
             minAabb.setMin( minAabb2 );
@@ -267,7 +267,7 @@
             colObj.isStaticObject() ||
               ( maxAabb.subtract( minAabb, tmpV1 ).length2() < 1e12 )
           ) {
-            bp.setAabb( colObj.getBroadphaseHandle(), minAabb, maxAabb, this.dispatcher1 );
+            bp.setAabb( colObj.broadphaseHandle, minAabb, maxAabb, this.dispatcher1 );
           }
 
           // Something went wrong, investigate.
