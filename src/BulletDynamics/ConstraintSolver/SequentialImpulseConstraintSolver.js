@@ -601,10 +601,10 @@
 
         deltaImpulse = contactConstraint.rhs -
           contactConstraint.appliedImpulse * contactConstraint.cfm;
-        deltaVel1Dotn = contactConstraint.contactNormal.dot( body1.internalGetDeltaLinearVelocity() ) +
-          contactConstraint.relpos1CrossNormal.dot( body1.internalGetDeltaAngularVelocity() );
-        deltaVel2Dotn = -contactConstraint.contactNormal.dot( body2.internalGetDeltaLinearVelocity() ) +
-          contactConstraint.relpos2CrossNormal.dot( body2.internalGetDeltaAngularVelocity() );
+        deltaVel1Dotn = contactConstraint.contactNormal.dot( body1.deltaLinearVelocity ) +
+          contactConstraint.relpos1CrossNormal.dot( body1.deltaAngularVelocity );
+        deltaVel2Dotn = -contactConstraint.contactNormal.dot( body2.deltaLinearVelocity ) +
+          contactConstraint.relpos2CrossNormal.dot( body2.deltaAngularVelocity );
 
         // var delta_rel_vel = deltaVel1Dotn - deltaVel2Dotn;
         deltaImpulse -= deltaVel1Dotn * contactConstraint.jacDiagABInv;
@@ -626,13 +626,13 @@
         }
 
         body1.internalApplyImpulse(
-          contactConstraint.contactNormal.multiplyVector( body1.internalGetInvMass(), tmpRSCRGVec1 ),
+          contactConstraint.contactNormal.multiplyVector( body1.invMass, tmpRSCRGVec1 ),
           contactConstraint.angularComponentA,
           deltaImpulse
         );
         body2.internalApplyImpulse(
           contactConstraint.contactNormal.negate( tmpRSCRGVec1 )
-            .multiplyVector( body2.internalGetInvMass(), tmpRSCRGVec1 ),
+            .multiplyVector( body2.invMass, tmpRSCRGVec1 ),
           contactConstraint.angularComponentB,
           deltaImpulse
         );
