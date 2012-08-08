@@ -646,19 +646,25 @@
       resolveSingleConstraintRowLowerLimit: function( body1, body2, contactConstraint ) {
         var deltaImpulse, deltaVel1Dotn, deltaVel2Dotn;
 
-        deltaImpulse = contactConstraint.rhs -
-          contactConstraint.appliedImpulse * contactConstraint.cfm;
-        deltaVel1Dotn = contactConstraint.contactNormal.dot( body1.internalGetDeltaLinearVelocity() ) +
-          contactConstraint.relpos1CrossNormal.dot( body1.internalGetDeltaAngularVelocity() );
-        deltaVel2Dotn = -contactConstraint.contactNormal.dot( body2.internalGetDeltaLinearVelocity() ) +
-          contactConstraint.relpos2CrossNormal.dot( body2.internalGetDeltaAngularVelocity() );
+        // local cached variables
+        var appliedImpulse = contactConstraint.appliedImpulse,
+            lowerLimit = contactConstraint.lowerLimit,
+            contactNormal = contactConstraint.contactNormal,
+            jacDiagABInv = contactConstraint.jacDiagABInv;
 
-        deltaImpulse -= deltaVel1Dotn * contactConstraint.jacDiagABInv;
-        deltaImpulse -= deltaVel2Dotn * contactConstraint.jacDiagABInv;
-        var sum = contactConstraint.appliedImpulse + deltaImpulse;
-        if ( sum < contactConstraint.lowerLimit ) {
-          deltaImpulse = contactConstraint.lowerLimit - contactConstraint.appliedImpulse;
-          contactConstraint.appliedImpulse = contactConstraint.lowerLimit;
+        deltaImpulse = contactConstraint.rhs -
+          appliedImpulse * contactConstraint.cfm;
+        deltaVel1Dotn = contactNormal.dot( body1.deltaLinearVelocity ) +
+          contactConstraint.relpos1CrossNormal.dot( body1.deltaAngularVelocity );
+        deltaVel2Dotn = -contactNormal.dot( body2.deltaLinearVelocity ) +
+          contactConstraint.relpos2CrossNormal.dot( body2.deltaAngularVelocity );
+
+        deltaImpulse -= deltaVel1Dotn * jacDiagABInv;
+        deltaImpulse -= deltaVel2Dotn * jacDiagABInv;
+        var sum = appliedImpulse + deltaImpulse;
+        if ( sum < lowerLimit ) {
+          deltaImpulse = lowerLimit - appliedImpulse;
+          contactConstraint.appliedImpulse = lowerLimit;
         }
 
         else {
@@ -666,14 +672,14 @@
         }
 
         body1.internalApplyImpulse(
-          contactConstraint.contactNormal.multiplyVector( body1.internalGetInvMass(), tmpRSCRLLVec1 ),
+          contactNormal.multiplyVector( body1.invMass, tmpRSCRLLVec1 ),
           contactConstraint.angularComponentA,
           deltaImpulse
         );
 
         body2.internalApplyImpulse(
-          contactConstraint.contactNormal.negate( tmpRSCRLLVec1 )
-            .multiplyVector( body2.internalGetInvMass(), tmpRSCRLLVec1 ),
+          contactNormal.negate( tmpRSCRLLVec1 )
+            .multiplyVector( body2.invMass, tmpRSCRLLVec1 ),
           contactConstraint.angularComponentB,
           deltaImpulse
         );
