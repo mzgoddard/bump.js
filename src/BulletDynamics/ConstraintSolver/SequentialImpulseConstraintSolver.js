@@ -222,22 +222,22 @@
             pos2 = cp.positionWorldOnB,
             torqueAxis0, torqueAxis1;
 
-        pos1.subtract( colObj0.getWorldTransform().origin, rel_pos1 );
-        pos2.subtract( colObj1.getWorldTransform().origin, rel_pos2 );
+        pos1.subtract( colObj0.worldTransform.origin, rel_pos1 );
+        pos2.subtract( colObj1.worldTransform.origin, rel_pos2 );
         relaxationRef.value = 1;
 
         torqueAxis0 = rel_pos1.cross( cp.normalWorldOnB, tmpSCCVec1 );
         solverConstraint.angularComponentA.assign(
           rb0 ?
-            rb0.getInvInertiaTensorWorld().multiplyVector( torqueAxis0, tmpSCCVec1 )
-            .multiplyVector( rb0.getAngularFactor(), tmpSCCVec1 ) :
+            rb0.invInertiaTensorWorld.multiplyVector( torqueAxis0, tmpSCCVec1 )
+            .multiplyVector( rb0.angularFactor, tmpSCCVec1 ) :
             vecZero );
 
         torqueAxis1 = rel_pos2.cross( cp.normalWorldOnB, tmpSCCVec1 );
         solverConstraint.angularComponentB.assign(
           rb1 ?
-            rb1.getInvInertiaTensorWorld().multiplyVector( torqueAxis1.negate( tmpSCCVec1 ), tmpSCCVec1 )
-            .multiplyVector( rb1.getAngularFactor(), tmpSCCVec1 ) :
+            rb1.invInertiaTensorWorld.multiplyVector( torqueAxis1.negate( tmpSCCVec1 ), tmpSCCVec1 )
+            .multiplyVector( rb1.angularFactor, tmpSCCVec1 ) :
             vecZero );
 
         var vec;
@@ -246,11 +246,11 @@
 
         if ( rb0 ) {
           vec = solverConstraint.angularComponentA.cross( rel_pos1, tmpSCCVec1 );
-          denom0 = rb0.getInvMass() + cp.normalWorldOnB.dot( vec );
+          denom0 = rb0.inverseMass + cp.normalWorldOnB.dot( vec );
         }
         if ( rb1 ) {
           vec = solverConstraint.angularComponentB.negate( tmpSCCVec1 ).cross( rel_pos2, tmpSCCVec1 );
-          denom1 = rb1.getInvMass() + cp.normalWorldOnB.dot( vec );
+          denom1 = rb1.inverseMass + cp.normalWorldOnB.dot( vec );
         }
 
         var denom = relaxationRef.value / ( denom0 + denom1 );
@@ -266,7 +266,7 @@
         vel1.subtract( vel2, vel );
         rel_velRef.value = cp.normalWorldOnB.dot( vel );
 
-        var penetration = cp.getDistance() + infoGlobal.linearSlop;
+        var penetration = cp.distance1 + infoGlobal.linearSlop;
 
         solverConstraint.friction = cp.combinedFriction;
 
@@ -287,15 +287,15 @@
           solverConstraint.appliedImpulse = cp.appliedImpulse * infoGlobal.warmstartingFactor;
           if ( rb0 ) {
             rb0.internalApplyImpulse(
-              solverConstraint.contactNormal.multiplyScalar( rb0.getInvMass(), tmpSCCVec1 )
-                .multiplyVector( rb0.getLinearFactor(), tmpSCCVec1 ),
+              solverConstraint.contactNormal.multiplyScalar( rb0.inverseMass, tmpSCCVec1 )
+                .multiplyVector( rb0.linearFactor, tmpSCCVec1 ),
               solverConstraint.angularComponentA,
               solverConstraint.appliedImpulse );
           }
           if ( rb1 ) {
             rb1.internalApplyImpulse(
-              solverConstraint.contactNormal.multiplyScalar( rb1.getInvMass(), tmpSCCVec1 )
-                .multiplyVector( rb1.getLinearFactor(), tmpSCCVec1 ),
+              solverConstraint.contactNormal.multiplyScalar( rb1.inverseMass, tmpSCCVec1 )
+                .multiplyVector( rb1.linearFactor, tmpSCCVec1 ),
               solverConstraint.angularComponentB.negate( tmpSCCVec2 ),
                 -solverConstraint.appliedImpulse );
           }
@@ -307,14 +307,14 @@
 
         var vel1Dotn =
           solverConstraint.contactNormal.dot(
-            rb0 ? rb0.getLinearVelocity() : vecZero ) +
+            rb0 ? rb0.linearVelocity : vecZero ) +
           solverConstraint.relpos1CrossNormal.dot(
-            rb0 ? rb0.getAngularVelocity() : vecZero );
+            rb0 ? rb0.angularVelocity : vecZero );
         var vel2Dotn =
           -solverConstraint.contactNormal.dot(
-            rb1 ? rb1.getLinearVelocity() : vecZero ) +
+            rb1 ? rb1.linearVelocity : vecZero ) +
           solverConstraint.relpos2CrossNormal.dot(
-            rb1 ? rb1.getAngularVelocity() : vecZero );
+            rb1 ? rb1.angularVelocity : vecZero );
 
         // renamed to avoid needing a closure
         var rel_vel2 = vel1Dotn + vel2Dotn;
