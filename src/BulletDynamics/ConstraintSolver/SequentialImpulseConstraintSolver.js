@@ -876,8 +876,8 @@
 
             for ( j = 0; j < numConstraints; j++ ) {
               constraints[ j ].solveConstraintObsolete(
-                constraints[ j ].getRigidBodyA(),
-                constraints[ j ].getRigidBodyB(),
+                constraints[ j ].rbA, // getRigidBodyA
+                constraints[ j ].rbB, // getRigidBodyB
                 infoGlobal.timeStep
               );
             }
