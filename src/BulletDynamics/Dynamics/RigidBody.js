@@ -16,7 +16,8 @@
       tmpM1 = Bump.Matrix3x3.create(),
       tmpM2 = Bump.Matrix3x3.create(),
       tmpT1 = Bump.Transform.create(),
-      uniqueId = 0;
+      uniqueId = 0,
+      CO_RIGID_BODY = Bump.CollisionObject.CollisionObjectTypes.CO_RIGID_BODY;
 
   Bump.gDeactivationTime = 2;
   Bump.gDisableDeactivation = false;
@@ -88,7 +89,7 @@
 
     typeMembers: {
       upcast: function( colObj ) {
-        if ( colObj.getInternalType() & Bump.CollisionObject.CollisionObjectTypes.CO_RIGID_BODY ) {
+        if ( colObj.internalType & CO_RIGID_BODY ) {
           return colObj;
         }
         return null;
