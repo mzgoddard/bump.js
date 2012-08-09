@@ -130,6 +130,20 @@
     }
   });
 
+  var tmpUCVAPtmpV1 = Bump.Vector3.create();
+  var tmpUCVAPtmpV2 = Bump.Vector3.create();
+  var tmpUCVAPp = Bump.Vector3.create();
+
+  var tmpCPPTritmpV1 = Bump.Vector3.create();
+  var tmpCPPTritmpV2 = Bump.Vector3.create();
+
+  var tmpCPPTetratmpV1 = Bump.Vector3.create();
+  var tmpCPPTetratmpV2 = Bump.Vector3.create();
+  var tmpCPPTetratmpV3 = Bump.Vector3.create();
+
+  var tmpPOOPtmpV1 = Bump.Vector3.create();
+  var tmpPOOPtmpV2 = Bump.Vector3.create();
+
   Bump.VoronoiSimplexSolver = Bump.type({
     init: function VoronoiSimplexSolver() {
       this.numVertices = 0;
@@ -198,8 +212,6 @@
             break;
 
           case 1:
-            tmpV1 = Bump.Vector3.create();
-
             this.cachedP1.assign( this.simplexPointsP[0] );
             this.cachedP2.assign( this.simplexPointsQ[0] );
             this.cachedV.assign( this.cachedP1.subtract( this.cachedP2 ) );
@@ -210,13 +222,13 @@
 
           // Closest point origin from line segment.
           case 2:
-            tmpV1 = Bump.Vector3.create();
+            tmpV1 = tmpUCVAPtmpV1;
 
             var from = this.simplexVectorW[0],
                 to = this.simplexVectorW[1],
                 nearest = Bump.Vector3.create();
 
-            p = Bump.Vector3.create( 0, 0, 0 );
+            p = tmpUCVAPp.setValue( 0, 0, 0 );
             var diff = p.subtract( from ),
                 v = to.subtract( from ),
                 t = v.dot( diff );
@@ -253,10 +265,10 @@
 
           // Closest point origin from triangle.
           case 3:
-            tmpV1 = Bump.Vector3.create();
-            tmpV2 = Bump.Vector3.create();
+            tmpV1 = tmpUCVAPtmpV1;
+            tmpV2 = tmpUCVAPtmpV2;
 
-            p = Bump.Vector3.create( 0, 0, 0 );
+            p = tmpUCVAPp.setValue( 0, 0, 0 );
 
             a = this.simplexVectorW[0];
             b = this.simplexVectorW[1];
@@ -283,10 +295,10 @@
             break;
 
           case 4:
-            tmpV1 = Bump.Vector3.create();
-            tmpV2 = Bump.Vector3.create();
+            tmpV1 = tmpUCVAPtmpV1;
+            tmpV2 = tmpUCVAPtmpV2;
 
-            p = Bump.Vector3.create( 0, 0, 0 );
+            p = tmpUCVAPp.setValue( 0, 0, 0 );
 
             a = this.simplexVectorW[0];
             b = this.simplexVectorW[1];
@@ -364,9 +376,9 @@
           return false;
         }
 
-        var tmpV1 = Bump.Vector3.create(),
-            tmpV2 = Bump.Vector3.create(),
-            tmpV3 = Bump.Vector3.create();
+        var tmpV1 = tmpCPPTetratmpV1,
+            tmpV2 = tmpCPPTetratmpV2,
+            tmpV3 = tmpCPPTetratmpV3;
 
         var q, sqDist, bestSqDist = Infinity;
         // If point outside face abc then compute closest point on abc
@@ -486,8 +498,8 @@
       },
 
       pointOutsideOfPlane: function( p, a, b, c, d ) {
-        var tmpV1 = Bump.Vector3.create(),
-            tmpV2 = Bump.Vector3.create();
+        var tmpV1 = tmpPOOPtmpV1,
+            tmpV2 = tmpPOOPtmpV2;
 
         // `normal` uses `tmpV2`.
         var normal = b.subtract( a, tmpV1 ).cross( c.subtract( a, tmpV2 ), tmpV2 );
@@ -507,7 +519,7 @@
 
         result.usedVertices.reset();
 
-        var tmpV1 = Bump.Vector3.create(),
+        var tmpV1 = tmpCPPTritmpV1,
             ab = b.subtract( a ),
             ac = c.subtract( a );
 
@@ -594,7 +606,7 @@
         v = vb * denom;
         w = vc * denom;
 
-        var tmpV2 = Bump.Vector3.create();
+        var tmpV2 = tmpCPPTritmpV2;
         result.closestPointOnSimplex.assign(
           a
             .add( ab.multiplyScalar( v, tmpV2 ), tmpV1 )
