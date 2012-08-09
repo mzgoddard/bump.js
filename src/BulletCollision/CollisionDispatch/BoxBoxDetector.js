@@ -32,6 +32,13 @@
     typeMembers: {
       create: function() {
         return [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+      },
+      reset: function( mat ) {
+        var i = 12;
+        while ( i-- ) {
+          mat[ i ] = 0;
+        }
+        return mat;
       }
     }
   });
@@ -715,6 +722,10 @@
     return cnum;
   };
 
+  // Used in getClosestPoints
+  var tmpGCPR1 = dMatrix3.create(),
+      tmpGCPR2 = dMatrix3.create();
+
   Bump.BoxBoxDetector = Bump.type({
     parent: Bump.DiscreteCollisionDetectorInterface,
 
@@ -752,8 +763,8 @@
         var skip = 0,
             contact = null;
 
-        var R1 = dMatrix3.create(),
-            R2 = dMatrix3.create();
+        var R1 = dMatrix3.reset( tmpGCPR1 ),
+            R2 = dMatrix3.reset( tmpGCPR2 );
 
         for ( var j = 0; j < 3; ++j ) {
           R1[ 0 + 4 * j ] = transformA.basis[j].x;
