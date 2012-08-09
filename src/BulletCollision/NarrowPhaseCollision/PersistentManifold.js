@@ -331,7 +331,7 @@
               manifoldPoint.positionWorldOnB.subtract( projectedPoint, tmpV3 )
             );
             distance2d = projectedDifference.dot( projectedDifference );
-            if ( distance2d  > this.getContactBreakingThreshold() * this.getContactBreakingThreshold() ) {
+            if ( distance2d  > this.contactBreakingThreshold * this.contactBreakingThreshold ) {
               this.removeContactPoint( i );
             }
 
