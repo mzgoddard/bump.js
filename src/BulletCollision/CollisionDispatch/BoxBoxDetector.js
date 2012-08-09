@@ -252,6 +252,16 @@
   var tmpBBVec1 = Bump.Vector3.create();
   var tmpBBVec2 = Bump.Vector3.create();
 
+  var tmpBBA = [ 0, 0, 0 ];
+  var tmpBBB = [ 0, 0, 0 ];
+  var tmpBBnormalR = { matrix: null, index: 0 };
+  var tmpBBrect = [ 0, 0 ];
+  var tmpBBquad = [ 0, 0, 0, 0, 0, 0, 0, 0 ];
+  var tmpBBret = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+  var tmpBBpoints = new Array( 3 * 8 );
+  var tmpBBdep = new Array( 8 );
+  var tmpBBiret = new Array( 8 );
+
   var dBoxBox2 = function(
     p1, R1, side1,
     p2, R2, side2,
@@ -262,9 +272,9 @@
         p = tmpBBp,
         pp = tmpBBpp.setValue( 0, 0, 0 ),
         normalC = tmpBBnormalC.setValue( 0, 0, 0 ),
-        normalR = { matrix: null, index: 0 },
-        A = [ 0, 0, 0 ],
-        B = [ 0, 0, 0 ],
+        normalR = tmpBBnormalR,
+        A = tmpBBA,
+        B = tmpBBB,
         R11 = 0, R12 = 0, R13 = 0, R21 = 0, R22 = 0, R23 = 0, R31 = 0, R32 = 0, R33 = 0,
         Q11 = 0, Q12 = 0, Q13 = 0, Q21 = 0, Q22 = 0, Q23 = 0, Q31 = 0, Q32 = 0, Q33 = 0,
         s = 0, s2 = 0, l = 0,
@@ -311,6 +321,9 @@
     // that is the smallest depth normal so far. Otherwise `normalR.matrix` is
     // `null` and `normalC` is set to a vector relative to body 1.
     // `invert_normal` is `true` if the sign of the normal should be flipped.
+
+    normalR.matrix = null;
+    normalR.index = null;
 
     var TST = function( expr1, expr2, normMatrix, normIndex, cc ) {
       s2 = Math.abs( expr1 ) - expr2;
@@ -580,7 +593,7 @@
     // Find the four corners of the incident face, in reference-face coordinates.
 
     // `quad` is the 2D coordinate of incident face (x,y pairs).
-    var quad = new Array( 8 ),
+    var quad = tmpBBquad,
         c1, c2, m11, m12, m21, m22;
     c1 = dDOT14( center, Ra, code1 );
     c2 = dDOT14( center, Ra, code2 );
@@ -606,12 +619,12 @@
     quad[7] = c2 + k2 - k4;
 
     // find the size of the reference face
-    var rect = [ 0, 0 ];
+    var rect = tmpBBrect;
     rect[0] = Sa[ code1 ];
     rect[1] = Sa[ code2 ];
 
     // intersect the incident and reference faces
-    var ret = new Array( 16 ),
+    var ret = tmpBBret,
         n = intersectRectQuad2( rect, quad, ret );
 
     if ( n < 1 ) {
@@ -626,9 +639,9 @@
     // the `ret` array as necessary so that `point` and `ret` correspond.
 
     // Penetrating contact points.
-    var point = new Array( 3 * 8 );
+    var point = tmpBBpoints;
     // Depths for those points.
-    var dep = new Array( 8 ),
+    var dep = tmpBBdep,
         det1 = 1 / ( m11 * m22 - m12 * m21 );
     m11 *= det1;
     m12 *= det1;
@@ -699,7 +712,7 @@
         }
       }
 
-      var iret = new Array( 8 );
+      var iret = tmpBBiret;
       cullPoints2( cnum, ret, maxc, i1, iret );
 
       for ( j = 0; j < maxc; ++j ) {
