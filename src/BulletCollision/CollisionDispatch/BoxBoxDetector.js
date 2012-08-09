@@ -281,19 +281,26 @@
         Q11 = 0, Q12 = 0, Q13 = 0, Q21 = 0, Q22 = 0, Q23 = 0, Q31 = 0, Q32 = 0, Q33 = 0,
         s = 0, s2 = 0, l = 0,
         i = 0, j = 0, invert_normal = false, code = 0,
-        pa, pb, tmp;
+        pa, pb, tmp,
+        pp0, pp1, pp2,
+        A0, A1, A2,
+        B0, B1, B2;
 
     // Get vector from centers of box 1 to box 2, relative to box 1.
     p = p2.subtract( p1, p );
     dMULTIPLY1_331( pp, R1, p );             // get pp = p relative to body 1
 
+    pp0 = pp[0];
+    pp1 = pp[1];
+    pp2 = pp[2];
+
     // get side lengths / 2
-    A[0] = side1[0] * 0.5;
-    A[1] = side1[1] * 0.5;
-    A[2] = side1[2] * 0.5;
-    B[0] = side2[0] * 0.5;
-    B[1] = side2[1] * 0.5;
-    B[2] = side2[2] * 0.5;
+    A[0] = A0 = side1[0] * 0.5;
+    A[1] = A1 = side1[1] * 0.5;
+    A[2] = A2 = side1[2] * 0.5;
+    B[0] = B0 = side2[0] * 0.5;
+    B[1] = B1 = side2[1] * 0.5;
+    B[2] = B2 = side2[2] * 0.5;
 
     // Rij is R1'*R2, i.e. the relative rotation between R1 and R2
     R11 = dDOT44( R1, 0, R2, 0 ); R12 = dDOT44( R1, 0, R2, 1 ); R13 = dDOT44( R1, 0, R2, 2 );
@@ -346,19 +353,19 @@
     var tstRet;
 
     // separating axis = u1, u2, u3
-    tstRet = TST( pp[0], ( A[0] + B[0] * Q11 + B[1] * Q12 + B[2] * Q13 ), R1, 0, 1 );
+    tstRet = TST( pp0, ( A0 + B0 * Q11 + B1 * Q12 + B2 * Q13 ), R1, 0, 1 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[1], ( A[1] + B[0] * Q21 + B[1] * Q22 + B[2] * Q23 ), R1, 1, 2 );
+    tstRet = TST( pp1, ( A1 + B0 * Q21 + B1 * Q22 + B2 * Q23 ), R1, 1, 2 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[2], ( A[2] + B[0] * Q31 + B[1] * Q32 + B[2] * Q33 ), R1, 2, 3 );
+    tstRet = TST( pp2, ( A2 + B0 * Q31 + B1 * Q32 + B2 * Q33 ), R1, 2, 3 );
     if ( tstRet !== undefined ) { return tstRet; }
 
     // separating axis = v1, v2, v3
-    tstRet = TST( dDOT41( R2, 0, p ), A[0] * Q11 + A[1] * Q21 + A[2] * Q31 + B[0], R2, 0, 4 );
+    tstRet = TST( dDOT41( R2, 0, p ), A0 * Q11 + A1 * Q21 + A2 * Q31 + B0, R2, 0, 4 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( dDOT41( R2, 1, p ), A[0] * Q12 + A[1] * Q22 + A[2] * Q32 + B[1], R2, 1, 5 );
+    tstRet = TST( dDOT41( R2, 1, p ), A0 * Q12 + A1 * Q22 + A2 * Q32 + B1, R2, 1, 5 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( dDOT41( R2, 2, p ), A[0] * Q13 + A[1] * Q23 + A[2] * Q33 + B[2], R2, 2, 6 );
+    tstRet = TST( dDOT41( R2, 2, p ), A0 * Q13 + A1 * Q23 + A2 * Q33 + B2, R2, 2, 6 );
     if ( tstRet !== undefined ) { return tstRet; }
 
     // Note: cross product axes need to be scaled when s is computed.
@@ -396,27 +403,27 @@
     Q33 += fudge2;
 
     // separating axis = u1 x (v1, v2, v3)
-    tstRet = TST( pp[2] * R21 - pp[1] * R31, A[1] * Q31 + A[2] * Q21 + B[1] * Q13 + B[2] * Q12, 0, -R31, R21, 7 );
+    tstRet = TST( pp2 * R21 - pp1 * R31, A1 * Q31 + A2 * Q21 + B1 * Q13 + B2 * Q12, 0, -R31, R21, 7 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[2] * R22 - pp[1] * R32, A[1] * Q32 + A[2] * Q22 + B[0] * Q13 + B[2] * Q11, 0, -R32, R22, 8 );
+    tstRet = TST( pp2 * R22 - pp1 * R32, A1 * Q32 + A2 * Q22 + B0 * Q13 + B2 * Q11, 0, -R32, R22, 8 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[2] * R23 - pp[1] * R33, A[1] * Q33 + A[2] * Q23 + B[0] * Q12 + B[1] * Q11, 0, -R33, R23, 9 );
+    tstRet = TST( pp2 * R23 - pp1 * R33, A1 * Q33 + A2 * Q23 + B0 * Q12 + B1 * Q11, 0, -R33, R23, 9 );
     if ( tstRet !== undefined ) { return tstRet; }
 
     // separating axis = u2 x (v1, v2, v3)
-    tstRet = TST( pp[0] * R31 - pp[2] * R11, A[0] * Q31 + A[2] * Q11 + B[1] * Q23 + B[2] * Q22, R31, 0, -R11, 10 );
+    tstRet = TST( pp0 * R31 - pp2 * R11, A0 * Q31 + A2 * Q11 + B1 * Q23 + B2 * Q22, R31, 0, -R11, 10 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[0] * R32 - pp[2] * R12, A[0] * Q32 + A[2] * Q12 + B[0] * Q23 + B[2] * Q21, R32, 0, -R12, 11 );
+    tstRet = TST( pp0 * R32 - pp2 * R12, A0 * Q32 + A2 * Q12 + B0 * Q23 + B2 * Q21, R32, 0, -R12, 11 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[0] * R33 - pp[2] * R13, A[0] * Q33 + A[2] * Q13 + B[0] * Q22 + B[1] * Q21, R33, 0, -R13, 12 );
+    tstRet = TST( pp0 * R33 - pp2 * R13, A0 * Q33 + A2 * Q13 + B0 * Q22 + B1 * Q21, R33, 0, -R13, 12 );
     if ( tstRet !== undefined ) { return tstRet; }
 
     // separating axis = u3 x (v1, v2, v3)
-    tstRet = TST( pp[1] * R11 - pp[0] * R21, A[0] * Q21 + A[1] * Q11 + B[1] * Q33 + B[2] * Q32, -R21, R11, 0, 13 );
+    tstRet = TST( pp1 * R11 - pp0 * R21, A0 * Q21 + A1 * Q11 + B1 * Q33 + B2 * Q32, -R21, R11, 0, 13 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[1] * R12 - pp[0] * R22, A[0] * Q22 + A[1] * Q12 + B[0] * Q33 + B[2] * Q31, -R22, R12, 0, 14 );
+    tstRet = TST( pp1 * R12 - pp0 * R22, A0 * Q22 + A1 * Q12 + B0 * Q33 + B2 * Q31, -R22, R12, 0, 14 );
     if ( tstRet !== undefined ) { return tstRet; }
-    tstRet = TST( pp[1] * R13 - pp[0] * R23, A[0] * Q23 + A[1] * Q13 + B[0] * Q32 + B[1] * Q31, -R23, R13, 0, 15 );
+    tstRet = TST( pp1 * R13 - pp0 * R23, A0 * Q23 + A1 * Q13 + B0 * Q32 + B1 * Q31, -R23, R13, 0, 15 );
     if ( tstRet !== undefined ) { return tstRet; }
 
     if ( code === 0 ) { return 0; }
