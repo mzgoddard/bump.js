@@ -791,14 +791,17 @@
             R2 = dMatrix3.reset( tmpGCPR2 );
 
         for ( var j = 0; j < 3; ++j ) {
-          R1[ 0 + 4 * j ] = transformA.basis[j].x;
-          R2[ 0 + 4 * j ] = transformB.basis[j].x;
+          var transformA_basis = transformA.basis[ j ],
+              transformB_basis = transformB.basis[ j ];
 
-          R1[ 1 + 4 * j ] = transformA.basis[j].y;
-          R2[ 1 + 4 * j ] = transformB.basis[j].y;
+          R1[ 0 + 4 * j ] = transformA_basis.x;
+          R2[ 0 + 4 * j ] = transformB_basis.x;
 
-          R1[ 2 + 4 * j ] = transformA.basis[j].z;
-          R2[ 2 + 4 * j ] = transformB.basis[j].z;
+          R1[ 1 + 4 * j ] = transformA_basis.y;
+          R2[ 1 + 4 * j ] = transformB_basis.y;
+
+          R1[ 2 + 4 * j ] = transformA_basis.z;
+          R2[ 2 + 4 * j ] = transformB_basis.z;
         }
 
         var normal      = tmpGCPVec1.setValue( 0, 0, 0 ),
