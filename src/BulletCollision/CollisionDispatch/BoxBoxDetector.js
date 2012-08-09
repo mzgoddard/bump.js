@@ -64,6 +64,8 @@
     beta.value  = ( uaub * q1 + q2 ) * d;
   };
 
+  var tmpIRQ2buffer = new Array( 16 );
+
   // Find all the intersection points between the 2D rectangle with vertices
   // at `(+/-h[0],+/-h[1])` and the 2D quadrilateral with vertices `(p[0],p[1])`,
   // `(p[2],p[3])`, `(p[4],p[5])`, `(p[6],p[7])`.
@@ -75,7 +77,7 @@
     // `qIdx` (and `rIdx`) contain `nq` (and `nr`) coordinate points for the
     // current (and chopped) polygons.
     var nq = 4, nr = 0,
-        buffer = new Array( 16 ),
+        buffer = tmpIRQ2buffer,
         // `qIdx` indexes inside `p`.
         q = p,
         qIdx = 0,
