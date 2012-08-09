@@ -9,6 +9,8 @@
   var tmpGCPVec1 = Bump.Vector3.create();
   var tmpGCPVec2 = Bump.Vector3.create();
   var tmpGCPVec3 = Bump.Vector3.create();
+  var tmpGCPdepth = { value: 0 };
+  var tmpGCPreturn_code = { value: 0 };
 
   var dDOTAV = function( a, aOff, b       ) { return a[ aOff ] * b.x       + a[ aOff + 1 ] * b.y           + a[ aOff + 2 ] * b.z;           },
       dDOTVA = function( a      , b, bOff ) { return a.x       * b[ bOff ] + a.y           * b[ bOff + 1 ] + a.z           * b[ bOff + 2 ]; },
@@ -778,9 +780,12 @@
         }
 
         var normal      = tmpGCPVec1.setValue( 0, 0, 0 ),
-            depth       = { value: 0 },
-            return_code = { value: 0 },
+            depth       = tmpGCPdepth,
+            return_code = tmpGCPreturn_code,
             maxc        = 4;
+
+        depth.value = 0;
+        return_code.value = 0;
 
         var num = dBoxBox2(
           transformA.origin,
