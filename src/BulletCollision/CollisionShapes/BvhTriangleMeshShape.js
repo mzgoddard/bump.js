@@ -123,65 +123,82 @@
         var m_meshInterface = this.meshInterface;
         var m_triangle = this.triangle;
 
-        var data = {
-          vertexbase: null,
-          numVerts: 0,
-          type: 0,
-          vertexStride: 0,
-          indexbase: null,
-          indexStride: 0,
-          numFaces: 0,
-          indicesType: 0
-        };
+        if ( !m_meshInterface.__triangleCache ) {
+          m_meshInterface.__triangleCache = {};
+        }
+        if ( !m_meshInterface.__triangleCache[ nodeTriangleIndex ] ) {
 
-        m_meshInterface.getLockedReadOnlyVertexIndexBase( data, nodeSubPart );
+          var data = {
+            vertexbase: null,
+            numVerts: 0,
+            type: 0,
+            vertexStride: 0,
+            indexbase: null,
+            indexStride: 0,
+            numFaces: 0,
+            indicesType: 0
+          };
 
-        var vertexbase  = data.vertexbase;
-        // var numverts    = data.numVerts;
-        var type        = data.type;
-        var stride      = data.vertexStride;
-        var indexbase   = data.indexbase;
-        var indexstride = data.indexStride;
-        // var numfaces    = data.numFaces;
-        var indicestype = data.indicesType;
+          m_meshInterface.getLockedReadOnlyVertexIndexBase( data, nodeSubPart );
 
-        var GfxbaseType = (
-          indicestype === PHY_SHORT ?
-            Uint16Array :
-            (
-              indicestype === PHY_INTEGER ?
-                Uint32Array :
-                Uint8Array
-            )
-        );
+          var vertexbase  = data.vertexbase;
+          // var numverts    = data.numVerts;
+          var type        = data.type;
+          var stride      = data.vertexStride;
+          var indexbase   = data.indexbase;
+          var indexstride = data.indexStride;
+          // var numfaces    = data.numFaces;
+          var indicestype = data.indicesType;
 
-        var gfxbase = new GfxbaseType( indexbase.buffer, nodeTriangleIndex * indexstride );
-        Bump.Assert( indicestype === PHY_INTEGER ||
-                     indicestype === PHY_SHORT   ||
-                     indicestype === PHY_UCHAR   );
+          var GfxbaseType = (
+            indicestype === PHY_SHORT ?
+              Uint16Array :
+              (
+                indicestype === PHY_INTEGER ?
+                  Uint32Array :
+                  Uint8Array
+              )
+          );
 
-        var meshScaling = m_meshInterface.getScaling();
-        for ( var j = 2; j >= 0; --j ) {
-          var graphicsindex = gfxbase[j];
+          var gfxbase = new GfxbaseType( indexbase.buffer, nodeTriangleIndex * indexstride );
+          Bump.Assert( indicestype === PHY_INTEGER ||
+                       indicestype === PHY_SHORT   ||
+                       indicestype === PHY_UCHAR   );
 
-          var graphicsbase;
-          if ( type === PHY_FLOAT ) {
-            graphicsbase = new Float32Array( vertexbase.buffer, graphicsindex * stride );
+          var meshScaling = m_meshInterface.getScaling();
+          for ( var j = 2; j >= 0; --j ) {
+            var graphicsindex = gfxbase[j];
 
-            m_triangle[j] = Bump.Vector3.create(
-              graphicsbase[0] * meshScaling.x,
-              graphicsbase[1] * meshScaling.y,
-              graphicsbase[2] * meshScaling.z
-            );
-          } else {
-            graphicsbase = new Float64Array( vertexbase.buffer, graphicsindex * stride );
+            var graphicsbase;
+            if ( type === PHY_FLOAT ) {
+              graphicsbase = new Float32Array( vertexbase.buffer, graphicsindex * stride );
 
-            m_triangle[j] = Bump.Vector3.create(
-              graphicsbase[0] * meshScaling.x,
-              graphicsbase[1] * meshScaling.y,
-              graphicsbase[2] * meshScaling.z
-            );
+              m_triangle[j] = Bump.Vector3.create(
+                graphicsbase[0] * meshScaling.x,
+                graphicsbase[1] * meshScaling.y,
+                graphicsbase[2] * meshScaling.z
+              );
+            } else {
+              graphicsbase = new Float64Array( vertexbase.buffer, graphicsindex * stride );
+
+              m_triangle[j] = Bump.Vector3.create(
+                graphicsbase[0] * meshScaling.x,
+                graphicsbase[1] * meshScaling.y,
+                graphicsbase[2] * meshScaling.z
+              );
+            }
           }
+
+          var _triangleCache = m_meshInterface.__triangleCache[ nodeTriangleIndex ] = [];
+          _triangleCache[ 0 ] = m_triangle[ 0 ];
+          _triangleCache[ 1 ] = m_triangle[ 1 ];
+          _triangleCache[ 2 ] = m_triangle[ 2 ];
+
+        } else {
+          var _triangleCache = m_meshInterface.__triangleCache[ nodeTriangleIndex ];
+          m_triangle[ 0 ] = _triangleCache[ 0 ];
+          m_triangle[ 1 ] = _triangleCache[ 1 ];
+          m_triangle[ 2 ] = _triangleCache[ 2 ];
         }
 
         this.callback.processTriangle( m_triangle, nodeSubPart, nodeTriangleIndex );
