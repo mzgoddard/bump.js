@@ -13,6 +13,28 @@
 
 (function( window, Bump ) {
 
+  var createGetter = function( Type, pool ) {
+    return function() {
+      return pool.pop() || Type.create();
+    };
+  };
+
+  var createDeller = function( pool ) {
+    return function() {
+      for ( var i = 0; i < arguments.length; ++i ) {
+        pool.push( arguments[i] );
+      }
+    };
+  };
+
+  var closestPointInputPool = [];
+
+  var getClosestPointInput = function() {
+    return closestPointInputPool.pop() || Bump.GjkPairDetector.ClosestPointInput.create();
+  };
+
+  var delClosestPointInput = createDeller( closestPointInputPool );
+
   // Defined at bottom of file
   var DummyResult;
 
@@ -91,7 +113,7 @@
         //   return;
         // }
 
-        var input = Bump.GjkPairDetector.ClosestPointInput.create();
+        var input = getClosestPointInput();
 
         var gjkPairDetector = Bump.GjkPairDetector.create( min0, min1, this.simplexSolver, this.pdSolver );
         gjkPairDetector.setMinkowskiA( min0 );
@@ -149,6 +171,9 @@
             if ( m_ownManifold ) {
               resultOut.refreshContactPoints();
             }
+
+            delClosestPointInput( input );
+
             return;
 
           } else {
@@ -198,6 +223,8 @@
               if ( m_ownManifold ) {
                 resultOut.refreshContactPoints();
               }
+
+              delClosestPointInput( input );
 
               return;
             }
@@ -280,6 +307,8 @@
         if ( m_ownManifold ) {
           resultOut.refreshContactPoints();
         }
+
+        delClosestPointInput( input );
       },
 
       calculateTimeOfImpact: Bump.notImplemented,
