@@ -10,6 +10,36 @@
 
 (function( window, Bump ) {
 
+  var createGetter = function( Type, pool ) {
+    return function() {
+      return pool.pop() || Type.create();
+    };
+  };
+
+  var createDeller = function( pool ) {
+    return function() {
+      for ( var i = 0; i < arguments.length; ++i ) {
+        pool.push( arguments[i] );
+      }
+    };
+  };
+
+  var triangleShapePool = [];
+
+  function getTriangleShape( v0, v1, v2 ) {
+    var shape = triangleShapePool.pop();
+    if ( !shape ) {
+      shape = Bump.TriangleShape.create( v0, v1, v2 );
+    } else {
+      shape.vertices10.assign( v0 );
+      shape.vertices11.assign( v1 );
+      shape.vertices12.assign( v2 );
+    }
+    return shape;
+  }
+
+  var delTriangleShape = createDeller( triangleShapePool );
+
   Bump.ConvexTriangleCallback = Bump.type({
     parent: Bump.TriangleCallback,
 
@@ -71,7 +101,7 @@
         var ob = m_triBody;
 
         if ( m_convexBody.getCollisionShape().isConvex() ) {
-          var tm = Bump.TriangleShape.create( triangle[0], triangle[1], triangle[2] );
+          var tm = getTriangleShape( triangle[0], triangle[1], triangle[2] );
           tm.setMargin( this.collisionMarginTriangle );
 
           var tmpShape = ob.getCollisionShape();
@@ -89,6 +119,7 @@
           colAlgo.destruct();
           ci.dispatcher1.freeCollisionAlgorithm( colAlgo );
           ob.internalSetTemporaryCollisionShape( tmpShape );
+          delTriangleShape( tm );
         }
 
       },
