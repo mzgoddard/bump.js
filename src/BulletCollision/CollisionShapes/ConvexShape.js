@@ -5,6 +5,26 @@
 // run: BulletCollision/BroadphaseCollision/BroadphaseProxy.js
 
 (function( window, Bump ) {
+
+  var createGetter = function( Type, pool ) {
+    return function() {
+      return pool.pop() || Type.create();
+    };
+  };
+
+  var createDeller = function( pool ) {
+    return function() {
+      for ( var i = 0; i < arguments.length; ++i ) {
+        pool.push( arguments[i] );
+      }
+    };
+  };
+
+  var vector3Pool = [];
+
+  var getVector3 = createGetter( Bump.Vector3, vector3Pool );
+  var delVector3 = createDeller( vector3Pool );
+
   var EPSILON = Math.pow( 2, -52 ),
       tmpV1 = Bump.Vector3.create(),
       tmpV2 = Bump.Vector3.create(),
@@ -44,13 +64,15 @@
 
         case Bump.BroadphaseNativeTypes.TRIANGLE_SHAPE_PROXYTYPE:
           var triangleShape = this;
-          var dir = localDir.clone();
-          var dots = Bump.Vector3.create(
-            dir.dot( triangleShape.vertices10 ),
-            dir.dot( triangleShape.vertices11 ),
-            dir.dot( triangleShape.vertices12 )
+          // var dir = localDir.clone();
+          var dots = getVector3().setValue(
+            localDir.dot( triangleShape.vertices10 ),
+            localDir.dot( triangleShape.vertices11 ),
+            localDir.dot( triangleShape.vertices12 )
           );
-          return dest.assign( triangleShape[ 'vertices1' + dots.maxAxis() ] );
+          dest.assign( triangleShape[ 'vertices1' + dots.maxAxis() ] );
+          delVector3( dots );
+          return dest;
 
     //     case Bump.BroadphaseNativeTypes.CYLINDER_SHAPE_PROXYTYPE:
     //       var cylShape = this;
