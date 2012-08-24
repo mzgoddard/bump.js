@@ -262,7 +262,7 @@
 
     if ( newsize < curSize ) {
       for ( i = newsize; i < curSize; ++i ) {
-        if ( arr[i].destruct ) {
+        if ( arr[i] && arr[i].destruct ) {
           arr[i].destruct();
         }
       }
