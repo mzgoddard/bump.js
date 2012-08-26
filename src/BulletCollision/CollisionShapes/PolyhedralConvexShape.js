@@ -133,4 +133,94 @@
       }
     }
   });
+
+  Bump.PolyhedralConvexAabbCachingShape = Bump.type({
+    parent: Bump.PolyhedralConvexShape,
+
+    init: function PolyhedralConvexShape() {
+      this._super();
+
+      this.localAabbMin = Bump.Vector3.create( 1, 1, 1 );
+      this.localAabbMax = Bump.Vector3.create( -1, -1, -1 );
+      this.isLocalAabbValid = false;
+    },
+
+    members: {
+      setCachedLocalAabb: function( aabbMin, aabbMax) {
+        this.isLocalAabbValid = true;
+        this.localAabbMin.assign( aabbMin );
+        this.localAabbMax.assign( aabbMax );
+      },
+
+      getCachedLocalAabb: function( aabbMin, aabbMax) {
+        Bump.Assert( this.isLocalAabbValid );
+        aabbMin.assign( this.localAabbMin );
+        aabbMax.assign( this.localAabbMax );
+      },
+
+      getNonvirtualAabb: function( trans, aabbMin, aabbMax, margin) {
+
+        //lazy evaluation of local aabb
+        Bump.Assert( this.isLocalAabbValid );
+        Bump.TransformAabb( this.localAabbMin, this.localAabbMax, margin, trans, aabbMin, aabbMax );
+      },
+
+      setLocalScaling: function( scaling ) {
+        Bump.ConvexInternalShape.prototype.setLocalScaling.call( this, scaling );
+        this.recalcLocalAabb();
+      },
+
+      getAabb: function( trans, aabbMin, aabbMax ) {
+        this.getNonvirtualAabb( trans, aabbMin, aabbMax, this.getMargin() );
+      },
+
+      recalcLocalAabb: function() {
+        this.isLocalAabbValid = true;
+
+        // #if 1
+        // static const btVector3 _directions[] =
+        var _directions =
+        [
+          Bump.Vector3.create( 1,  0,  0 ),
+          Bump.Vector3.create( 0,  1,  0 ),
+          Bump.Vector3.create( 0,  0,  1 ),
+          Bump.Vector3.create( -1, 0,  0 ),
+          Bump.Vector3.create( 0, -1,  0 ),
+          Bump.Vector3.create( 0,  0, -1 )
+        ];
+
+        // btVector3 _supporting[] =
+        var _supporting =
+        [
+          Bump.Vector3.create( 0, 0, 0 ),
+          Bump.Vector3.create( 0, 0, 0 ),
+          Bump.Vector3.create( 0, 0, 0 ),
+          Bump.Vector3.create( 0, 0, 0 ),
+          Bump.Vector3.create( 0, 0, 0 ),
+          Bump.Vector3.create( 0, 0, 0 )
+        ];
+
+        this.batchedUnitVectorGetSupportingVertexWithoutMargin( _directions, _supporting, 6 );
+
+        for ( var i = 0; i < 3; ++i ) {
+          this.localAabbMax[ i ] = _supporting[ i ][ i ] + this.collisionMargin;
+          this.localAabbMin[ i ] = _supporting[ i + 3 ][ i ] - this.collisionMargin;
+        }
+
+        // #else
+        // 
+        // for (int i=0;i<3;i++)
+        // {
+        //   btVector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
+        //   vec[i] = btScalar(1.);
+        //   btVector3 tmp = localGetSupportingVertex(vec);
+        //   m_localAabbMax[i] = tmp[i];
+        //   vec[i] = btScalar(-1.);
+        //   tmp = localGetSupportingVertex(vec);
+        //   m_localAabbMin[i] = tmp[i];
+        // }
+        // #endif
+      }
+    }
+  });
 })( this, this.Bump );
